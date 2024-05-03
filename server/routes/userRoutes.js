@@ -9,6 +9,5 @@ const router = express.Router();
 
 router.post("/signUp", signUpController);
 router.post("/signIn", signInController);
-router.post("/sendEmail", sendEmail);
 
 module.exports = router;

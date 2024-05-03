@@ -25,7 +25,6 @@ app.use(morgan('dev'));
 
 // Set up routes
 app.use('/api/v1/auth', require('./routes/userRoutes'));
-app.use('/api/v1/auth', require('./routes/sendEmail'));
 
 // Start the server
 const PORT = process.env.PORT || 4848;

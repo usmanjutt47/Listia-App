@@ -106,12 +106,10 @@ const signInController = async (req, res) => {
     });
   }
 };
-const sendEmail = async (req, res) => {
-  
-};
+
 
 module.exports = {
   signUpController,
   signInController,
-  sendEmail,
+
 };
