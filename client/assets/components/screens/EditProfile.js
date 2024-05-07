@@ -1,5 +1,4 @@
-import {useNavigation} from "@react-navigation/native";
-import React, {useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,115 +7,181 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  ScrollView,
 } from "react-native";
-import {FontAwesome} from "@expo/vector-icons";
-import {Feather} from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../../context/authContext";
+import axios from "axios";
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditProfile = () => {
+  const [state, setState] = useContext(AuthContext);
   const navigation = useNavigation();
-  const [enabledInput, setEnabledInput] = useState(null);
+  const { user } = state;
+  const [name, setName] = useState(user?.name);
+  const [email, setEmail] = useState(user?.email);
+  const [phone, setPhone] = useState(user?.phone);
+  const [password, setPassword] = useState(user?.password);
+  const [image, setImage] = useState(user?.profileImage || null);
 
-  // Function to handle clicks on the pen icon
-  const handleIconClick = (inputName) => {
-    // Toggle the state of enabledInput
-    setEnabledInput((prev) => (prev === inputName ? null : inputName));
+  // Load saved image URI when component mounts
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const savedImageURI = await AsyncStorage.getItem('profileImage');
+        if (savedImageURI) {
+          setImage(savedImageURI);
+        }
+      } catch (error) {
+        console.error('Failed to load image URI:', error);
+      }
+    };
+
+    loadImage();
+  }, []);
+
+  // Save image URI in AsyncStorage
+  const saveImage = async (uri) => {
+    try {
+      await AsyncStorage.setItem('profileImage', uri);
+    } catch (error) {
+      console.error('Failed to save image URI:', error);
+    }
   };
 
-  // Function to check if a `TextInput` is enabled
-  const isInputEnabled = (inputName) => enabledInput === inputName;
+  const handleUpdate = async () => {
+    try {
+      const { data } = await axios.put('auth/update-user', { name, email, phone, password });
+      alert(data?.message);
+      setState({ ...state, user: data?.updatedUser });
+    } catch (error) {
+      alert(error.response?.data?.message || 'An error occurred');
+      console.error(error);
+    }
+  };
+
+  const handleImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.status !== 'granted') {
+      alert('Permission to access media library is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImageURI = result.assets[0].uri;
+      setImage(selectedImageURI);
+
+      // Save the selected image URI in AsyncStorage
+      await AsyncStorage.setItem('profileImage', selectedImageURI);
+
+      // Notify the drawer immediately of the change
+      // Trigger a refresh by calling a function or updating a context state
+      navigation.navigate('Profile', { refreshImage: true });
+    }
+  };
+
 
   return (
     <View style={styles.container}>
-      {/* Top Section */}
       <View style={styles.topSection}>
-        <TouchableOpacity
-          style={styles.goBackButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.goBackButton} onPress={() => navigation.goBack()}>
           <ImageBackground
             source={require("../images/gobackBackground.png")}
             style={styles.goBackImageBackground}
           >
-            <Image
-              source={require("../images/goback.png")}
-              style={styles.goBackImage}
-            />
+            <Image source={require("../images/goback.png")} style={styles.goBackImage} />
           </ImageBackground>
         </TouchableOpacity>
 
         <Text style={styles.headerText}>Edit Profile</Text>
       </View>
 
-      {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={styles.profileImageContainer}>
-          <ImageBackground
-            source={require("../images/photo.png")}
-            style={styles.profileImage}
-          >
-            <TouchableOpacity
-              style={styles.cameraIconContainer}
-              onPress={() => navigation.navigate("EditProfile")}
-            >
-              <FontAwesome name="camera" size={16} color="#fff" />
-            </TouchableOpacity>
-          </ImageBackground>
-        </View>
-
-        {/* Create an array of inputs for each field */}
-        {["name", "email", "phone", "password"].map((inputName, index) => (
-          <View
-            key={inputName}
-            style={[
-              styles.inputContainer,
-              {marginTop: index > 0 ? 20 : 50}, // Add margin for all except the first one
-            ]}
-          >
-            <TextInput
-              placeholder={
-                inputName.charAt(0).toUpperCase() + inputName.slice(1)
-              }
-              inputMode={inputName === "phone" ? "decimal" : "text"}
-              style={{
-                flex: 1,
-                paddingLeft: 10,
-                height: "100%",
-                borderColor: isInputEnabled(inputName) ? "#238832" : "#fff",
-                borderWidth: 1,
-                borderRadius: 30,
-                backgroundColor: isInputEnabled(inputName) ? "#F2F2F2" : "#fff",
-              }}
-              editable={isInputEnabled(inputName)} // Conditionally enable TextInput
-            />
-
-            {/* Pen icon on the right side */}
-            {!isInputEnabled(inputName) && (
-              <TouchableOpacity onPress={() => handleIconClick(inputName)}>
-                <Feather
-                  name="edit-2"
-                  size={17}
-                  color="#238832"
-                  style={{paddingRight: 10}}
-                />
-              </TouchableOpacity>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.profileImageContainer}>
+            {image ? (
+              <ImageBackground
+                source={{ uri: image }}
+                style={styles.profileImage}
+                imageStyle={styles.profileImageStyle}
+              >
+                <TouchableOpacity
+                  style={styles.cameraIconContainer}
+                  onPress={handleImagePicker}
+                >
+                  <FontAwesome name="camera" size={16} color="#fff" />
+                </TouchableOpacity>
+              </ImageBackground>
+            ) : (
+              <ImageBackground
+                source={require("../images/Editprofile.png")}
+                style={styles.profileImage}
+              >
+                <TouchableOpacity
+                  style={styles.cameraIconContainer}
+                  onPress={handleImagePicker}
+                >
+                  <FontAwesome name="camera" size={16} color="#fff" />
+                </TouchableOpacity>
+              </ImageBackground>
             )}
           </View>
-        ))}
-        <View style={{marginTop: "40%"}}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("HomeScreen")}
-            style={{
-              backgroundColor: "#238832",
-              height: 48,
-              borderRadius: 30,
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{color: "#fff", textAlign: "center"}}>
-              Save Change
-            </Text>
-          </TouchableOpacity>
-        </View>
+
+          <View>
+            <Text style={styles.textLabel}>Name</Text>
+            <TextInput
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+              style={styles.textInput}
+              inputMode="text"
+            />
+
+            <Text style={styles.textLabel}>Email</Text>
+            <TextInput
+              placeholder="Email"
+              editable={false}
+              value={email}
+              style={styles.textInput}
+              inputMode="email"
+            />
+
+            <Text style={styles.textLabel}>Phone</Text>
+            <TextInput
+              placeholder="Phone"
+              value={phone}
+              onChangeText={setPhone}
+              style={styles.textInput}
+              inputMode="numeric"
+            />
+
+            <Text style={styles.textLabel}>Password</Text>
+            <TextInput
+              secureTextEntry
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              style={styles.textInput}
+              inputMode="text"
+            />
+          </View>
+
+          <View>
+            <TouchableOpacity onPress={handleUpdate} style={styles.saveButton}>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -125,11 +190,11 @@ const EditProfile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#238832",
+    backgroundColor: '#238832',
   },
   topSection: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 20,
     paddingHorizontal: 20,
   },
@@ -139,60 +204,70 @@ const styles = StyleSheet.create({
   goBackImageBackground: {
     height: 35,
     width: 35,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   goBackImage: {
     height: 15,
     width: 15,
-    alignSelf: "center",
+    alignSelf: 'center',
   },
   headerText: {
     flex: 1,
-    color: "#fff",
+    color: '#fff',
     fontSize: 23,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   profileSection: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderTopRightRadius: 35,
     borderTopLeftRadius: 35,
     marginTop: 20,
     padding: 20,
   },
   profileImageContainer: {
-    alignSelf: "center",
+    alignSelf: 'center',
     marginTop: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   profileImage: {
-    height: 112,
-    width: 112,
-    justifyContent: "center",
-    alignItems: "center",
+    height: 122,
+    width: 122,
+    borderRadius: 61,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cameraIconContainer: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    padding: 5,
-    backgroundColor: "#fff",
-    borderRadius: 30,
-    width: 37,
-    height: 37,
-    backgroundColor: "#238832",
-    alignItems: "center",
-    justifyContent: "center",
+  profileImageStyle: {
+    borderRadius: 61,
+    resizeMode: 'cover',
   },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#238832",
-    borderRadius: 30,
-    height: 48,
+  textLabel: {
+    marginLeft: 33,
+    marginBottom: 5,
+    fontWeight: 'bold',
     marginTop: 20,
+  },
+  textInput: {
+    marginLeft: 20,
+    borderRadius: 30,
+    padding: 8,
+    paddingLeft: 10,
+    backgroundColor: '#F2F2F2',
+  },
+  saveButton: {
+    backgroundColor: '#238832',
+    padding: 15,
+    justifyContent: 'center',
+    borderRadius: 30,
+    width: '80%',
+    alignSelf: 'center',
+    marginTop: '50%',
+  },
+  saveButtonText: {
+    color: 'white',
+    textAlign: 'center',
   },
 });
 

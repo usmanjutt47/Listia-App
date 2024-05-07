@@ -85,7 +85,6 @@ const EmailVerification = () => {
         }}
       >
         {/* Image */}
-        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
             source={require("../images/emailverfication.png")}
             style={{
@@ -95,7 +94,6 @@ const EmailVerification = () => {
               justifyContent: "center",
             }}
           />
-        </TouchableOpacity>
 
         {/* Text Inputs */}
         <View

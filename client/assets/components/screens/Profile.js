@@ -1,198 +1,209 @@
-import {useNavigation} from "@react-navigation/native";
-import React, {useEffect, useState} from "react";
-import {
-  View,
-  Text,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-  TextInput,
-  Touchable,
-} from "react-native";
-import {Feather, AntDesign, FontAwesome5} from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
   const navigation = useNavigation();
-  const [changePassword, setChangePassword] = useState();
+  const isFocused = useIsFocused();
+  const [user, setUser] = useState(null);
+  const [imageURI, setImageURI] = useState(null);
+
+  const loadData = async () => {
+    try {
+      const savedImageURI = await AsyncStorage.getItem('profileImage');
+      if (savedImageURI) {
+        setImageURI(savedImageURI);
+      }
+  
+      const savedUserData = await AsyncStorage.getItem('@auth');
+      if (savedUserData) {
+        const parsedUserData = JSON.parse(savedUserData);
+        setUser(parsedUserData.user);
+      }
+    } catch (error) {
+      console.error('Failed to load data from AsyncStorage:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Retrieve data from AsyncStorage
-        const data = await AsyncStorage.getItem("@auth");
-        if (data) {
-          const parsedData = JSON.parse(data);
-          // Update state with user data
-          setUser(parsedData.user);
-        }
-      } catch (error) {
-        console.error("Error fetching data from AsyncStorage:", error);
-      }
-    };
-    fetchData();
-  }, []);
+    if (isFocused) {
+      loadData();
+    }
+  }, [isFocused]);
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('profileImage');
+      await AsyncStorage.removeItem('@auth');
+      navigation.navigate("SignIn");
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
+
+  const handleLogoutPress = () => {
+    handleLogout();
+  };
 
   const userName = user ? user.name : "Guest";
+  const userEmail = user ? user.email : "user@gmail.com";
 
   return (
-    <View style={{flex: 1, backgroundColor: "#238832"}}>
-      {/* Top Section */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginTop: 20,
-        }}
-      >
-        <View style={{left: 10, top: 3}}>
+    <View style={styles.container}>
+      <View style={styles.topSection}>
+        <TouchableOpacity style={styles.goBackButton} onPress={() => navigation.goBack()}>
           <ImageBackground
             source={require("../images/gobackBackground.png")}
-            style={{height: 35, width: 35, justifyContent: "center"}}
+            style={styles.goBackImageBackground}
           >
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image
-                source={require("../images/goback.png")}
-                style={{height: 15, width: 15, alignSelf: "center"}}
-              />
-            </TouchableOpacity>
+            <Image source={require("../images/goback.png")} style={styles.goBackImage} />
           </ImageBackground>
-        </View>
-
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 23,
-            fontWeight: "bold",
-            flex: 1,
-            textAlign: "center",
-          }}
-        >
-          Profile
-        </Text>
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Profile</Text>
       </View>
-      <View style={{alignSelf: "center", marginTop: 20, alignItems: "center"}}>
+      <View style={styles.profileImageContainer}>
         <ImageBackground
-          source={require("../images/photo.png")}
-          style={{height: 83, width: 83}}
+          source={imageURI ? { uri: imageURI } : require("../images/photo.png")}
+          style={styles.profileImage}
         >
-          <TouchableOpacity onPress={() => navigation.navigate("EditProfile")}>
-            <FontAwesome5
-              name="edit"
-              size={22}
-              color="#fff"
-              style={{marginTop: 50, marginLeft: 60}}
-            />
+          <TouchableOpacity style={styles.editIcon} onPress={() => navigation.navigate("EditProfile")}>
+            <FontAwesome name="edit" size={24} color="#fff" />
           </TouchableOpacity>
         </ImageBackground>
-        <Text style={{textAlign: "center", fontSize: 18, color: "#fff"}}>
-          {userName}
-        </Text>
-        <Text style={{textAlign: "center", fontSize: 15, color: "#fff"}}>
-          {user ? user.email : "user@gmail.com"}
-        </Text>
+        <Text style={styles.userName}>{userName}</Text>
+        <Text style={styles.userEmail}>{userEmail}</Text>
       </View>
-
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#fff",
-          borderTopRightRadius: 35,
-          borderTopLeftRadius: 35,
-          marginTop: "20%",
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            height: 48,
-            width: "90%",
-            backgroundColor: "#F2F2F2",
-            alignSelf: "center",
-            borderRadius: 30,
-            justifyContent: "space-between",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{color: "#606060", marginLeft: 10}}>
-            Change password
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("ChangePassword")}
-          >
-            <AntDesign
-              name="arrowright"
-              size={24}
-              color="#238832"
-              style={{alignSelf: "center", marginRight: 20}}
-            />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            height: 48,
-            width: "90%",
-            backgroundColor: "#F2F2F2",
-            alignSelf: "center",
-            borderRadius: 30,
-            justifyContent: "space-between",
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 20,
-          }}
-        >
-          <Text style={{color: "#606060", marginLeft: 10}}>Subscription</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Subscription")}>
-            <AntDesign
-              name="arrowright"
-              size={24}
-              color="#238832"
-              style={{alignSelf: "center", marginRight: 20}}
-            />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            height: 48,
-            width: "90%",
-            backgroundColor: "#F2F2F2",
-            alignSelf: "center",
-            borderRadius: 30,
-            justifyContent: "space-between",
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 20,
-          }}
-        >
-          <Text style={{color: "#606060", marginLeft: 10}}>Contact us</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("ContactUs")}>
-            <AntDesign
-              name="arrowright"
-              size={24}
-              color="#238832"
-              style={{alignSelf: "center", marginRight: 20}}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={{marginTop: "60%", alignItems: "center"}}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("SignIn")}
-            style={{
-              height: 48,
-              width: "90%",
-              justifyContent: "center",
-              backgroundColor: "#238832",
-              borderRadius: 30,
-            }}
-          >
-            <Text style={{color: "#fff", textAlign: "center"}}>Log Out</Text>
+      <View style={styles.optionsContainer}>
+        <Option title="Change password" onPress={() => navigation.navigate("ChangePassword")} />
+        <Option title="Subscription" onPress={() => navigation.navigate("Subscription")} />
+        <Option title="Contact us" onPress={() => navigation.navigate("ContactUs")} />
+        <View style={styles.logoutButtonContainer}>
+          <TouchableOpacity onPress={handleLogoutPress} style={styles.logoutButton}>
+            <Text style={styles.logoutButtonText}>Log Out</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 };
+
+const Option = ({ title, onPress }) => (
+  <View style={styles.option}>
+    <Text style={styles.optionText}>{title}</Text>
+    <TouchableOpacity onPress={onPress}>
+      <AntDesign name="arrowright" size={24} color="#238832" style={styles.optionIcon} />
+    </TouchableOpacity>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#238832",
+  },
+  topSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  goBackButton: {
+    padding: 5,
+  },
+  goBackImageBackground: {
+    height: 35,
+    width: 35,
+    justifyContent: "center",
+  },
+  goBackImage: {
+    height: 15,
+    width: 15,
+    alignSelf: "center",
+  },
+  headerText: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 23,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  profileImageContainer: {
+    alignSelf: "center",
+    marginTop: 20,
+    alignItems: "center",
+  },
+  profileImage: {
+    height: 112,
+    width: 112,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 99,
+    overflow: "hidden",
+  },
+  editIcon: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    zIndex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 50,
+    padding: 5,
+  },
+  userName: {
+    textAlign: "center",
+    fontSize: 18,
+    color: "#fff",
+    marginTop: 5,
+  },
+  userEmail: {
+    textAlign: "center",
+    fontSize: 15,
+    color: "#fff",
+  },
+  optionsContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopRightRadius: 35,
+    borderTopLeftRadius: 35,
+    marginTop: "20%",
+    padding: 20,
+  },
+  option: {
+    height: 48,
+    width: "90%",
+    backgroundColor: "#F2F2F2",
+    alignSelf: "center",
+    borderRadius: 30,
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  optionText: {
+    color: "#606060",
+    marginLeft: 10,
+  },
+  optionIcon: {
+    alignSelf: "center",
+    marginRight: 20,
+  },
+  logoutButtonContainer: {
+    marginTop: "60%",
+    alignItems: "center",
+  },
+  logoutButton: {
+    height: 48,
+    width: "90%",
+    justifyContent: "center",
+    backgroundColor: "#238832",
+    borderRadius: 30,
+  },
+  logoutButtonText: {
+    color: "#fff",
+    textAlign: "center",
+  },
+});
 
 export default Profile;

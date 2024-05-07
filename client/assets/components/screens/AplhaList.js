@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,23 +9,22 @@ import {
   Modal,
   Image,
 } from "react-native";
-import {useNavigation} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import {
   AntDesign,
   Feather,
   FontAwesome5,
   SimpleLineIcons,
 } from "@expo/vector-icons";
-import {MaterialIcons} from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const AlphaList = () => {
   const navigation = useNavigation();
   const [selectedView, setSelectedView] = useState("All");
-  const [isModalVisible, setModalVisible] = useState(false); // Modal visibility state
+  const [isModalVisible, setModalVisible] = useState(false);
 
-  // Handle shopping cart icon click to show/hide modal
   const handleCartClick = () => {
-    setModalVisible(true); // Set modal visibility to true when shopping cart is clicked
+    setModalVisible(true);
   };
 
   const handleViewPress = (viewName) => {
@@ -34,7 +33,6 @@ const AlphaList = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Section */}
       <View style={styles.topSection}>
         <ImageBackground
           source={require("../images/gobackBackground.png")}
@@ -43,15 +41,13 @@ const AlphaList = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
               source={require("../images/goback.png")}
-              style={{height: 15, width: 15, alignSelf: "center"}}
+              style={{ height: 15, width: 15, alignSelf: "center" }}
             />
           </TouchableOpacity>
         </ImageBackground>
       </View>
 
-      {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>Alpha List</Text>
           <TouchableOpacity onPress={handleCartClick}>
@@ -69,7 +65,6 @@ const AlphaList = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Modal */}
         <Modal
           visible={isModalVisible}
           transparent={true}
@@ -78,7 +73,7 @@ const AlphaList = () => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={{fontSize: 20, fontWeight: "bold"}}>Cart</Text>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>Cart</Text>
               <View
                 style={{
                   borderRadius: 20,
@@ -91,10 +86,10 @@ const AlphaList = () => {
                   alignSelf: "center",
                 }}
               >
-                <Text style={{fontWeight: "bold", fontSize: 15, margin: 10}}>
+                <Text style={{ fontWeight: "bold", fontSize: 15, margin: 10 }}>
                   Milk
                 </Text>
-                <View style={{justifyContent: "center", bottom: 15}}>
+                <View style={{ justifyContent: "center", bottom: 15 }}>
                   <TouchableOpacity>
                     <ImageBackground
                       source={require("../images/deleteBackground.png")}
@@ -110,27 +105,29 @@ const AlphaList = () => {
                         name="delete"
                         size={15}
                         color="red"
-                        style={{alignSelf: "center"}}
+                        style={{ alignSelf: "center" }}
                       />
                     </ImageBackground>
                   </TouchableOpacity>
-                  <View style={{flexDirection: "row", alignContent: "center"}}>
+                  <View
+                    style={{ flexDirection: "row", alignContent: "center" }}
+                  >
                     <FontAwesome5
                       name="gripfire"
                       size={13}
                       color="#238832"
-                      style={{margin: 5, bottom: 5, marginLeft: 15}}
+                      style={{ margin: 5, bottom: 5, marginLeft: 15 }}
                     />
-                    <Text style={{fontSize: 10, marginRight: 20}}>
+                    <Text style={{ fontSize: 10, marginRight: 20 }}>
                       23 celeries
                     </Text>
                     <SimpleLineIcons
                       name="energy"
                       size={15}
                       color="#238832"
-                      style={{bottom: 3}}
+                      style={{ bottom: 3 }}
                     />
-                    <Text style={{fontSize: 10}}>60 Macros</Text>
+                    <Text style={{ fontSize: 10 }}>60 Macros</Text>
                   </View>
                 </View>
               </View>
@@ -146,7 +143,7 @@ const AlphaList = () => {
                 }}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={{color: "#fff", textAlign: "center"}}>
+                <Text style={{ color: "#fff", textAlign: "center" }}>
                   Mark as Bought
                 </Text>
               </TouchableOpacity>
@@ -154,27 +151,25 @@ const AlphaList = () => {
           </View>
         </Modal>
 
-        {/* List Item */}
         <View style={styles.listItemContainer}>
           <Feather
             name="list"
             size={15}
             color="black"
-            style={{marginRight: 5}}
+            style={{ marginRight: 5 }}
           />
           <TouchableOpacity>
             <Text style={styles.listItemText}>List 1/7 Completed</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Search Container */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
             <Feather
               name="search"
               size={20}
               color="#248C35"
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
             />
             <TextInput
               style={styles.searchTextInput}
@@ -184,10 +179,8 @@ const AlphaList = () => {
           </View>
         </View>
 
-        {/* Text "Meat" */}
         <Text style={styles.defaultText}>Meat</Text>
 
-        {/* View Container */}
         <View style={styles.viewsContainer}>
           {["All", "Milk", "Mango", "Oranges"].map((viewName) => (
             <TouchableOpacity
@@ -210,8 +203,7 @@ const AlphaList = () => {
           ))}
         </View>
 
-        {/* Add New Item Button */}
-        <View style={{justifyContent: "flex-end", flex: 1}}>
+        <View style={{ justifyContent: "flex-end", flex: 1 }}>
           <TouchableOpacity
             style={{
               backgroundColor: "#CFE6D2",

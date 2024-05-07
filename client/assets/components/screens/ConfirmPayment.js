@@ -19,10 +19,8 @@ const ConfirmPayment = () => {
   const [expirationDate, setExpirationDate] = useState("");
   const [cardNumber, setCardNumber] = useState("");
 
-  // State variable to track which input field is focused
   const [focusedInput, setFocusedInput] = useState(null);
 
-  // Handler functions for each input field
   const handleCardHolderNameChange = (input) => {
     setCardHolderName(input);
   };
@@ -65,14 +63,12 @@ const ConfirmPayment = () => {
       borderWidth: 1,
       borderColor: isFocused ? "#238832" : "#F2F2F2",
       marginTop: 15,
-      // Set text color to green if focused, gray otherwise
       color: isFocused ? "#238832" : "#838383",
     };
   };
 
   return (
     <View style={{flex: 1, backgroundColor: "#238832"}}>
-      {/* Top Section */}
       <View
         style={{
           flexDirection: "row",
@@ -107,7 +103,6 @@ const ConfirmPayment = () => {
         </Text>
       </View>
 
-      <ScrollView>
         <View
         style={{
           flex: 1,
@@ -119,7 +114,9 @@ const ConfirmPayment = () => {
           alignContent: "center",
         }}
       >
-        {/* Card Image */}
+        <ScrollView showsVerticalScrollIndicator={false}> 
+
+       
         <ImageBackground
           source={require("../images/card.png")}
           style={{
@@ -129,7 +126,6 @@ const ConfirmPayment = () => {
             borderRadius: 30,
           }}
         >
-          {/* Card Holder's Name */}
           <Text
             style={{color: "#fff", fontSize: 15, marginTop: 20, marginLeft: 10}}
           >
@@ -139,7 +135,6 @@ const ConfirmPayment = () => {
             </Text>
           </Text>
 
-          {/* Card Number */}
           <View
             style={{flexDirection: "row", marginTop: 50, alignItems: "center"}}
           >
@@ -151,7 +146,6 @@ const ConfirmPayment = () => {
             </Text>
           </View>
 
-          {/* Valid Thru and Balance */}
           <View
             style={{
               flexDirection: "row",
@@ -167,7 +161,6 @@ const ConfirmPayment = () => {
             </Text>
           </View>
 
-          {/* Expiration Date and Balance */}
           <View
             style={{
               flexDirection: "row",
@@ -182,7 +175,6 @@ const ConfirmPayment = () => {
           </View>
         </ImageBackground>
 
-        {/* Input Fields */}
         <View style={{alignItems: "center", marginTop: "20%"}}>
           <TextInput
             value={cardNumber}
@@ -224,7 +216,6 @@ const ConfirmPayment = () => {
           />
         </View>
 
-        {/* Total Amount */}
         <View
           style={{
             height: 48,
@@ -246,7 +237,6 @@ const ConfirmPayment = () => {
           </Text>
         </View>
 
-        {/* Pay Now Button */}
         <TouchableOpacity
           onPress={() => navigation.navigate("PaymentHistory")}
           style={{
@@ -263,8 +253,8 @@ const ConfirmPayment = () => {
             Pay Now
           </Text>
         </TouchableOpacity>
+        </ScrollView>
       </View>
-      </ScrollView>
     </View>
   );
 };

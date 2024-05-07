@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,16 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-import {Feather, EvilIcons} from "@expo/vector-icons";
-import {useNavigation} from "@react-navigation/native";
-import {StatusBar} from "expo-status-bar";
+import { Feather, EvilIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {AuthContext} from "../../../context/authContext";
+import { AuthContext } from "../../../context/authContext";
 
-const {width, height} = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const SignIn = () => {
   const navigation = useNavigation();
@@ -28,34 +29,31 @@ const SignIn = () => {
 
   const [password, setPassword] = useState();
   const [email, setEmail] = useState();
-  const [loading, setLoading] = useContext(AuthContext);
-  const [state, setState] =  useContext(AuthContext);
+  const [state, setState] = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async () => {
+    if (!email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+    setLoading(true);
     try {
-      if (!email || !password) {
-        alert("Please fill all fields");
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
-      const {data} = await axios.post(
-        "/auth/signIn",
-        {email, password}
-      );
-      setState(data)
+      const { data } = await axios.post("/auth/signIn", { email, password });
+      setState(data);
       await AsyncStorage.setItem("@auth", JSON.stringify(data));
       alert(data && data.message);
-      navigation.navigate("HomeScreen")
+      navigation.navigate("HomeScreen");
     } catch (error) {
-      alert(error.response.data.message);
+      alert(error.response?.data?.message || "An error occurred");
+      console.error(error);
+    } finally {
       setLoading(false);
-      console.log(error);
     }
   };
 
+
   const getLocalStorage = async () => {
     let data = await AsyncStorage.getItem("@auth");
-    console.log("Local Storage ==> ", data);
   };
   getLocalStorage();
 
@@ -66,114 +64,116 @@ const SignIn = () => {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      <ImageBackground
-        source={require("../images/login.png")}
-        style={styles.imageBackground}
-        accessibilityLabel="Sign In Background"
-      >
-        <Image source={require("../images/group.png")} style={styles.logo} />
-        <Text style={styles.text}>Sign In</Text>
-        <Text style={{color: "white"}}>Please login to continue</Text>
-      </ImageBackground>
-
-      <View
-        style={[
-          styles.containerView,
-          isEmailActive ? styles.activeContainer : styles.inactiveContainer,
-        ]}
-      >
-        <Feather
-          name="mail"
-          size={20}
-          color={isEmailActive ? "green" : "#838383"}
-          style={styles.icon}
-        />
-        <TextInput
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          placeholder="Email"
-          inputMode="email"
-          placeholderTextColor={isEmailActive ? "green" : "#838383"}
-          style={[
-            styles.input,
-            isEmailActive ? styles.activeInput : styles.inactiveInput,
-          ]}
-          onFocus={() => {
-            setIsEmailActive(true);
-            setIsPasswordActive(false);
-            setIsNameActive(false);
-          }}
-          onBlur={() => setIsEmailActive(false)}
-        />
-      </View>
-
-      <View
-        style={[
-          styles.containerView,
-          isPasswordActive ? styles.activeContainer : styles.inactiveContainer,
-        ]}
-      >
-        <EvilIcons
-          name="unlock"
-          size={20}
-          color={isPasswordActive ? "green" : "#838383"}
-          style={styles.icon}
-        />
-        <TextInput
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          placeholder="Password"
-          inputMode="text"
-          secureTextEntry={!isPasswordVisible}
-          placeholderTextColor={isPasswordActive ? "green" : "#838383"}
-          style={[
-            styles.input,
-            isPasswordActive ? styles.activeInput : styles.inactiveInput,
-          ]}
-          onFocus={() => {
-            setIsPasswordActive(true);
-            setIsEmailActive(false);
-          }}
-          onBlur={() => setIsPasswordActive(false)}
-        />
-        <Feather
-          name={isPasswordVisible ? "eye-off" : "eye"}
-          size={24}
-          color={isPasswordActive ? "green" : "#838383"}
-          style={styles.eyeIcon}
-          onPress={togglePasswordVisibility}
-        />
-      </View>
-
-      <View>
-        <TouchableOpacity onPress={() => navigation.navigate("ForgetPassword")}>
-          <Text style={{color: "#238832", marginLeft: "50%"}}>
-            Forgot your password?
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        style={{flexDirection: "row", justifyContent: "center", marginTop: 2}}
-      >
-        <Text
-          style={{
-            alignSelf: "center",
-            flexDirection: "row",
-            fontSize: 16,
-            color: "#838383",
-          }}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ImageBackground
+          source={require("../images/login.png")}
+          style={styles.imageBackground}
+          accessibilityLabel="Sign In Background"
         >
-          Don't have an account?{" "}
-        </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-          <Text style={{color: "green", fontSize: 16}}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
+          <Image source={require("../images/group.png")} style={styles.logo} />
+          <Text style={styles.text}>Sign In</Text>
+          <Text style={{ color: "white" }}>Please login to continue</Text>
+        </ImageBackground>
+
+        <View
+          style={[
+            styles.containerView,
+            isEmailActive ? styles.activeContainer : styles.inactiveContainer,
+          ]}
+        >
+          <Feather
+            name="mail"
+            size={20}
+            color={isEmailActive ? "green" : "#838383"}
+            style={styles.icon}
+          />
+          <TextInput
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+            placeholder="Email"
+            inputMode="email"
+            placeholderTextColor={isEmailActive ? "green" : "#838383"}
+            style={[
+              styles.input,
+              isEmailActive ? styles.activeInput : styles.inactiveInput,
+            ]}
+            onFocus={() => {
+              setIsEmailActive(true);
+              setIsPasswordActive(false);
+              setIsNameActive(false);
+            }}
+            onBlur={() => setIsEmailActive(false)}
+          />
+        </View>
+
+        <View
+          style={[
+            styles.containerView,
+            isPasswordActive ? styles.activeContainer : styles.inactiveContainer,
+          ]}
+        >
+          <EvilIcons
+            name="unlock"
+            size={20}
+            color={isPasswordActive ? "green" : "#838383"}
+            style={styles.icon}
+          />
+          <TextInput
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            placeholder="Password"
+            inputMode="text"
+            secureTextEntry={!isPasswordVisible}
+            placeholderTextColor={isPasswordActive ? "green" : "#838383"}
+            style={[
+              styles.input,
+              isPasswordActive ? styles.activeInput : styles.inactiveInput,
+            ]}
+            onFocus={() => {
+              setIsPasswordActive(true);
+              setIsEmailActive(false);
+            }}
+            onBlur={() => setIsPasswordActive(false)}
+          />
+          <Feather
+            name={isPasswordVisible ? "eye-off" : "eye"}
+            size={24}
+            color={isPasswordActive ? "green" : "#838383"}
+            style={styles.eyeIcon}
+            onPress={togglePasswordVisibility}
+          />
+        </View>
+
+        <View>
+          <TouchableOpacity onPress={() => navigation.navigate("ForgetPassword")}>
+            <Text style={{ color: "#238832", left: "55%", top: 3 }}>
+              Forgot your password?
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}> {loading ? "Please wait..." : "Login"}</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{ flexDirection: "row", justifyContent: "center", marginTop: 2 }}
+        >
+          <Text
+            style={{
+              alignSelf: "center",
+              flexDirection: "row",
+              fontSize: 16,
+              color: "#838383",
+            }}
+          >
+            Don't have an account?{" "}
+          </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+            <Text style={{ color: "green", fontSize: 16 }}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };

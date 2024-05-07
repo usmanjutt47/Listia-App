@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,24 +7,34 @@ import {
   Image,
   ImageBackground,
 } from "react-native";
-import {useNavigation} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
 const AddNewItem = () => {
   const navigation = useNavigation();
+  const [category, setCategory] = useState(null);
 
-  return (
-    <View style={{flex: 1, backgroundColor: "#238832"}}>
-      {/* Top Section */}
-      <View style={{flexDirection: "row", alignItems: "center", marginTop: 20}}>
-        <View style={{left: 10}}>
+  const handleItemSelection = (selectedCategory) => {
+    if (category !== selectedCategory) {
+      setCategory(selectedCategory);
+    } else {
+      setCategory(null);
+    }
+  };
+
+  return ( 
+    <View style={{ flex: 1, backgroundColor: "#238832" }}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}
+      >
+        <View style={{ left: 10 }}>
           <ImageBackground
             source={require("../images/gobackBackground.png")}
-            style={{height: 35, width: 35, justifyContent: "center"}}
+            style={{ height: 35, width: 35, justifyContent: "center" }}
           >
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
                 source={require("../images/goback.png")}
-                style={{height: 15, width: 15, alignSelf: "center"}}
+                style={{ height: 15, width: 15, alignSelf: "center" }}
               />
             </TouchableOpacity>
           </ImageBackground>
@@ -55,13 +65,15 @@ const AddNewItem = () => {
           padding: 20,
         }}
       >
-        <Text style={{fontSize: 20, fontWeight: "bold"}}>Create New Item</Text>
-        <Text style={{fontSize: 10}}>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Create New Item
+        </Text>
+        <Text style={{ fontSize: 10 }}>
           Please fill the information to create the list
         </Text>
 
-        <View style={{marginTop: 30}}>
-          <Text style={{marginBottom: 5, marginLeft: 3}}>Item name</Text>
+        <View style={{ marginTop: 30 }}>
+          <Text style={{ marginBottom: 5, marginLeft: 3 }}>Item name</Text>
           <TextInput
             placeholder="Enter Name"
             placeholderTextColor="#838383"
@@ -82,8 +94,10 @@ const AddNewItem = () => {
             marginTop: 20,
           }}
         >
-          <View style={{flex: 1, marginRight: 10}}>
-            <Text style={{marginBottom: 5, marginLeft: 3}}>Total Calories</Text>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={{ marginBottom: 5, marginLeft: 3 }}>
+              Total Calories
+            </Text>
             <TextInput
               inputMode="numeric"
               placeholder="Enter Value"
@@ -99,8 +113,8 @@ const AddNewItem = () => {
             />
           </View>
 
-          <View style={{flex: 1}}>
-            <Text style={{marginBottom: 5, marginLeft: 3}}>Total Macros</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ marginBottom: 5, marginLeft: 3 }}>Total Macros</Text>
             <TextInput
               inputMode="numeric"
               placeholder="Enter Value"
@@ -115,10 +129,81 @@ const AddNewItem = () => {
             />
           </View>
         </View>
-        <View style={{justifyContent: "flex-end", flex: 1}}>
+        <View
+          style={{
+            justifyContent: "space-between",
+            marginTop: 30,
+            flexDirection: "row",
+          }}
+        >
           <TouchableOpacity
             style={{
-              backgroundColor: "#238832",
+              backgroundColor: category === "Milk" ? "green" : "#F2F2F2",
+              width: 60,
+              borderRadius: 30,
+              height: 30,
+              justifyContent: "center",
+            }}
+            onPress={() => handleItemSelection("Milk")}
+            disabled={category === "Milk"}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: category === "Milk" ? "#fff" : "#000",
+                alignContent: "center",
+              }}
+            >
+              Milk
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: category === "Mango" ? "green" : "#F2F2F2",
+              width: 60,
+              borderRadius: 30,
+              height: 30,
+              justifyContent: "center",
+            }}
+            onPress={() => handleItemSelection("Mango")}
+            disabled={category === "Mango"}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: category === "Mango" ? "#fff" : "#000",
+                alignContent: "center",
+              }}
+            >
+              Mango
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: category === "Oranges" ? "green" : "#F2F2F2",
+              width: 60,
+              borderRadius: 30,
+              height: 30,
+              justifyContent: "center",
+            }}
+            onPress={() => handleItemSelection("Oranges")}
+            disabled={category === "Oranges"}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: category === "Oranges" ? "#fff" : "#000",
+                alignContent: "center",
+              }}
+            >
+              Oranges
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ justifyContent: "flex-end", flex: 1 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: category ? "#238832" : "#F2F2F2",
               width: "90%",
               height: 46,
               justifyContent: "center",
@@ -126,8 +211,9 @@ const AddNewItem = () => {
               borderRadius: 35,
             }}
             onPress={() => navigation.navigate("HomeScreen")}
+            disabled={!category}
           >
-            <Text style={{textAlign: "center", fontSize: 17, color: "#fff"}}>
+            <Text style={{ textAlign: "center", fontSize: 17, color: "#fff" }}>
               Add
             </Text>
           </TouchableOpacity>

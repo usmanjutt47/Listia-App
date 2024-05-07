@@ -121,7 +121,7 @@ export default function App() {
   const userName = user ? user.name : "Guest";
   return (
     <NavigationContainer>
-      <Drawer.Navigator
+      <Drawer.Navigator 
         drawerContent={(props) => (
           <SafeAreaView style={{flex: 1}}>
             <View style={{marginLeft: 20, marginTop: 20, marginBottom: 50}}>
@@ -178,9 +178,7 @@ export default function App() {
         <Drawer.Screen
           name="Home"
           component={HomeStack}
-          options={{
-            drawerLabel: "Home",
-            drawerIcon: () => <AntDesign name="home" size={24} color="white" />,
+          options={{drawerLabel: "Home",drawerIcon: () => <AntDesign name="home" size={24} color="white" />,
           }}
         />
         <Drawer.Screen

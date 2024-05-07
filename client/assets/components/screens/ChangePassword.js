@@ -1,5 +1,5 @@
 import {useNavigation} from "@react-navigation/native";
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {
   View,
   Text,
@@ -8,42 +8,67 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Alert,
 } from "react-native";
-// import { BlurView } from '@react-native-community/blur'; // Import BlurView
+import axios from "axios";
+import {AuthContext} from "../../../context/authContext";
 
 const ChangePassword = () => {
   const navigation = useNavigation();
+  const [state, setState] = useContext(AuthContext);
+  const {user} = state;
 
-  // State variables for email and password
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  // State variable to track active input field
-  const [activeInput, setActiveInput] = useState(null);
-
-  // State variable to track modal visibility
   const [isModalVisible, setModalVisible] = useState(false);
 
-  // Handle input focus
-  const handleFocus = (input) => {
-    setActiveInput(input);
+  // Validate password inputs
+  const validateInputs = () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters long");
+      return false;
+    }
+    return true;
   };
 
-  // Handle blur
-  const handleBlur = () => {
-    setActiveInput(null);
-  };
+  // Handle password change
+  const handleChangePassword = async () => {
+    // Validate inputs
+    if (!validateInputs()) {
+      return;
+    }
 
-  // Function to handle closing the modal
-  const handleModalClose = () => {
-    setModalVisible(false);
-    // Add any other actions here if needed when the modal closes
+    try {
+      const response = await axios.put(
+        `/auth/update-user`, // Update with your server URL
+        {
+          email: user.email,
+          newPassword: password,
+          confirmPassword: confirmPassword,
+        }
+      );
+
+      const data = response.data;
+
+      if (data.success) {
+        // Password changed successfully
+        setModalVisible(true);
+      } else {
+        // Show error message
+        Alert.alert("Error", data.message || "Error changing password");
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      Alert.alert("Error", "An error occurred while changing the password");
+    }
   };
 
   return (
     <View style={{flex: 1, backgroundColor: "#238832"}}>
-      {/* Top Section */}
       <View style={{flexDirection: "row", alignItems: "center", marginTop: 20}}>
         <View style={{left: 10, top: 3}}>
           <ImageBackground
@@ -81,14 +106,12 @@ const ChangePassword = () => {
           padding: 20,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
             source={require("../images/changePassword.png")}
             style={{width: 317, height: 304, marginBottom: 20}}
           />
-        </TouchableOpacity>
 
-        {/* New password input */}
+        {/* New Password */}
         <Text
           style={{fontSize: 13, color: "#000", marginLeft: 10, marginBottom: 5}}
         >
@@ -104,13 +127,12 @@ const ChangePassword = () => {
             borderRadius: 35,
             paddingLeft: 10,
             borderWidth: 1,
-            borderColor: activeInput === "password" ? "#238832" : "#F2F2F2",
+            borderColor: "#F2F2F2",
           }}
-          onFocus={() => handleFocus("password")}
-          onBlur={handleBlur}
+          secureTextEntry={true}
         />
 
-        {/* Confirm password input */}
+        {/* Confirm New Password */}
         <Text
           style={{
             fontSize: 13,
@@ -120,33 +142,26 @@ const ChangePassword = () => {
             marginBottom: 5,
           }}
         >
-          Re-Enter New Password
+          Confirm New Password
         </Text>
         <TextInput
           value={confirmPassword}
           onChangeText={setConfirmPassword}
-          placeholder="Re-Enter New Password"
+          placeholder="Confirm New Password"
           style={{
             padding: 10,
             backgroundColor: "#F2F2F2",
             borderRadius: 35,
             paddingLeft: 10,
             borderWidth: 1,
-            borderColor:
-              activeInput === "confirmPassword" ? "#238832" : "#F2F2F2",
+            borderColor: "#F2F2F2",
           }}
-          onFocus={() => handleFocus("confirmPassword")}
-          onBlur={handleBlur}
+          secureTextEntry={true}
         />
 
-        {/* Save button */}
+        {/* Save Button */}
         <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("HomeScreen");
-            setTimeout(() => {
-              setModalVisible(true);
-            }, 300);
-          }}
+          onPress={handleChangePassword}
           style={{
             backgroundColor: "#238832",
             padding: 18,
@@ -165,7 +180,7 @@ const ChangePassword = () => {
           animationType="slide"
           transparent={true}
           visible={isModalVisible}
-          onRequestClose={handleModalClose}
+          onRequestClose={() => setModalVisible(false)}
         >
           <View
             style={{
@@ -185,15 +200,21 @@ const ChangePassword = () => {
                 alignItems: "center",
               }}
             >
-              <ImageBackground
-                source={require("../images/successfull.png")}
-                style={{height: 59, width: 59, justifyContent: "center"}}
+              <View
+                style={{
+                  alignSelf: "center",
+                  width: 50,
+                  height: 50,
+                  backgroundColor: "green",
+                  borderRadius: 30,
+                  bottom: 5,
+                }}
               >
                 <Image
                   source={require("../images/tick.png")}
                   style={{height: 20, width: 20, alignSelf: "center"}}
                 />
-              </ImageBackground>
+              </View>
               <Text style={{fontSize: 16, fontWeight: "bold", marginBottom: 5}}>
                 Password Changed Successfully
               </Text>
@@ -203,8 +224,7 @@ const ChangePassword = () => {
 
               {/* Close button */}
               <TouchableOpacity
-                onPressIn={() => navigation.navigate("SignIn")}
-                onPress={handleModalClose}
+                onPress={() => navigation.navigate("SignIn")}
                 style={{
                   backgroundColor: "#238832",
                   padding: 10,
@@ -220,7 +240,7 @@ const ChangePassword = () => {
                     padding: 10,
                   }}
                 >
-                  Back to login
+                  Back to Login
                 </Text>
               </TouchableOpacity>
             </View>

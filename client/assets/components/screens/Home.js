@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import {
   View,
   ImageBackground,
@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import {useNavigation} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import DrawerScreenWrapper from "./DrawerScreenWrapper";
-import {AuthContext, AuthProvider} from "../../../context/authContext";
+import { AuthContext } from "../../../context/authContext";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -48,7 +48,19 @@ const Home = () => {
 
         <View style={styles.bottomContainer}>
           <Text> {state?.user?.name || "Guest"}</Text>
-          <View style={{justifyContent: "flex-end", marginTop: "140%"}}>
+
+          <View
+            style={{
+              width: 62,
+              height: 62,
+              borderRadius: 35,
+              overflow: "hidden",
+              backgroundColor: "green",
+              marginTop: "auto",
+              marginLeft: "auto",
+              margin: 20,
+            }}
+          >
             <TouchableOpacity onPress={() => navigation.navigate("AplhaList")}>
               <View
                 style={{
@@ -56,15 +68,17 @@ const Home = () => {
                   height: 62,
                   justifyContent: "center",
                   alignItems: "center",
-                  marginLeft: "auto",
-                  margin: 30,
                   backgroundColor: "green",
                   borderRadius: 35,
+                  marginTop: "auto",
+                  marginBottom: "auto",
+                  marginLeft: "auto",
+                  marginRight: "auto",
                 }}
               >
                 <Image
                   source={require("../images/plus.png")}
-                  style={{alignSelf: "center", height: 20, width: 20}}
+                  style={{ height: 20, width: 20, alignSelf: "center" }}
                 />
               </View>
             </TouchableOpacity>
